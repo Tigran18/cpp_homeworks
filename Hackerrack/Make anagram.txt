@@ -1,0 +1,48 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+/*
+ * Complete the 'makeAnagram' function below.
+ *
+ * The function is expected to return an INTEGER.
+ * The function accepts following parameters:
+ *  1. STRING a
+ *  2. STRING b
+ */
+
+int makeAnagram(string a, string b) {
+    // Create frequency arrays for both strings
+    vector<int> freqA(26);
+    vector<int> freqB(26);
+    for (char c : a) {
+        freqA[c - 'a']++;
+    }
+    for (char c : b) {
+        freqB[c - 'a']++;
+    }
+    int res = 0;
+    for (int i = 0; i < 26; i++) {
+        res += abs(freqA[i] - freqB[i]);
+    }
+    return res;
+}
+
+int main()
+{
+    ofstream fout(getenv("OUTPUT_PATH"));
+
+    string a;
+    getline(cin, a);
+
+    string b;
+    getline(cin, b);
+
+    int res = makeAnagram(a, b);
+
+    fout << res << "\n";
+
+    fout.close();
+
+    return 0;
+}

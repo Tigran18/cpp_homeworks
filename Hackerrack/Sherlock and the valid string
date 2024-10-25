@@ -1,0 +1,68 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+/*
+ * Complete the 'isValid' function below.
+ *
+ * The function is expected to return a STRING.
+ * The function accepts STRING s as parameter.
+ */
+
+string isValid(string s) {
+    vector<int> freq(26, 0);
+    int m = s.size();
+    
+    for (int i = 0; i < m; i++) {
+        char a = s[i];
+        freq[a - 'a']++;
+    }
+
+    vector<int> frequencyCount;
+    for (int f : freq) {
+        if (f > 0) {
+            frequencyCount.push_back(f);
+        }
+    }
+
+    int n = frequencyCount.size();
+    
+    if (n == 1) {
+        return "YES";
+    }
+
+    sort(frequencyCount.begin(), frequencyCount.end());
+    int firstFreq = frequencyCount[0];
+    int lastFreq = frequencyCount[n - 1];
+
+    if (firstFreq == lastFreq) {
+        return "YES";
+    }
+
+    if (lastFreq - firstFreq == 1 && 
+        count(frequencyCount.begin(), frequencyCount.end(), lastFreq) == 1) {
+        return "YES";
+    }
+    
+    if (firstFreq == 1 && count(frequencyCount.begin(), frequencyCount.end(), firstFreq) == 1) {
+        return "YES";
+    }
+
+    return "NO";
+}
+
+int main()
+{
+    ofstream fout(getenv("OUTPUT_PATH"));
+
+    string s;
+    getline(cin, s);
+
+    string result = isValid(s);
+
+    fout << result << "\n";
+
+    fout.close();
+
+    return 0;
+}
