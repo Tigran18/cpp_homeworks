@@ -44,6 +44,15 @@ public:
 		return i;
 	}
 
+	static friend istream& operator>>(istream& in, String& obj) {
+		char ch;
+		obj.str.clear();
+		while (in.get(ch) && ch != '\n') {
+			obj.str.push_back(ch);
+		}
+		return in;
+	}
+
 	~String() {};
 private:
 	vector<char> str;
@@ -51,16 +60,23 @@ private:
 
 int main() {
 	String str1;
-	vector<char> ch = { 'H', 'e', 'l', 'l', 'o', ' ', 'W', 'o', 'r', 'l', 'd', '!' };
+	vector<char> ch = { 'H', 'e', 'l', 'l', 'o', ' ', 'W', 'o', 'r', 'l', 'd', '!'};
 	for (auto& a:ch) {
 		str1.setString(a);
 	}
 	str1.getString();
 	cout<<str1.strLen()<<endl;
 
-	String str2({ 'H', 'e', 'l', 'l', 'o', '!', '\0' });
+	String str2({ 'H', 'e', 'l', 'l', 'o', '!'});
 	str2.getString();
 	cout<< str2.strLen()<<endl;
+
+	String str3({ 'H', 'e', 'l', 'l', 'o', '!'});
+	cin >> str3;
+
+	str3.getString();
+	cout << str3.strLen() << endl;
+
 
 	if (str1.strCmp(str2)) {
 		cout << "They are the same" << endl;
@@ -69,6 +85,12 @@ int main() {
 		cout << "They are not the same" << endl;
 	}
 
+	if (str3.strCmp(str2)) {
+		cout << "They are the same" << endl;
+	}
+	else {
+		cout << "They are not the same" << endl;
+	}
 
 	return 0;
 }
