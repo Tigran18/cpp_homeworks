@@ -1,0 +1,10 @@
+vector<int> rotLeft(vector<int> a, int d) {
+    vector<int> vec;
+    for(int i=0; i<a.size()-d; i++){
+        vec.push_back(a[d+i]);
+    }
+    for(int i=0; i<d; i++){
+        vec.push_back(a[i]);
+    }
+    return vec;
+}
