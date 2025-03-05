@@ -5,8 +5,12 @@
 
 int main() {
     std::set<std::string> ips;
-    std::ifstream file("ips_list.txt");
     std::string ip;
+    std::ifstream file("ips_list.txt");
+    if (!file) {
+        std::cerr << "Error opening file!\n";
+        return 1;
+    }
     while (file >> ip) {
         ips.insert(ip);
     }

@@ -11,6 +11,7 @@ def write_ips_to_file(ips, filename):
     with open(filename, 'w') as file:
         for ip in ips:
             file.write(ip + '\n')
+    file.close()
 
 if __name__ == "__main__":
     num_ips = 1000
