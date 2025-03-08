@@ -1,5 +1,6 @@
 #include <iostream>
 #include <vector>
+#include <chrono>
 
 template <typename T>
 class Add {
@@ -72,10 +73,18 @@ int main() {
         std::cout << std::endl;
     }
 
+    auto start_for_matrix=std::chrono::high_resolution_clock::now();
     std::cout << "Matrix C (A + B):" << std::endl;
     c.print();
-
+    auto end_for_matrix=std::chrono::high_resolution_clock::now();
+    auto duration_for_matrixes=std::chrono::duration_cast<std::chrono::microseconds>(end_for_matrix-start_for_matrix).count();
+    std::cout<<"Time cost for matrix sum is: "<<duration_for_matrixes<<std::endl;
+    
+    auto start_for_index=std::chrono::high_resolution_clock::now();
+    auto end_for_index=std::chrono::high_resolution_clock::now();
+    auto duration_for_index=std::chrono::duration_cast<std::chrono::microseconds>(end_for_index-start_for_index).count();
     std::cout << "Element at [2][2] in Matrix C: " << c[2][2] << std::endl;
+    std::cout<<"Time cost for index sum is: "<<duration_for_index<<std::endl;
 
     return 0;
 }
