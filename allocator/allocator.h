@@ -7,7 +7,7 @@ template <typename T>
 struct SimpleAllocator {
     using value_type = T;
 
-    SimpleAllocator()=default;
+    SimpleAllocator()=delete;
 
     template <typename U>
     SimpleAllocator(const SimpleAllocator<U>&) noexcept {}

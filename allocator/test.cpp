@@ -4,17 +4,6 @@
 
 int main() {
     try {
-        std::vector<int, SimpleAllocator<int>> vec;
-        vec.push_back(10);
-        vec.push_back(20);
-        vec.push_back(30);
-
-        std::cout << "Vector elements: ";
-        for (int val : vec) {
-            std::cout << val << " ";
-        }
-        std::cout << "\n";
-
         int* ptr = SimpleAllocator<int>::allocate(5);
 
         for (int i = 0; i < 5; ++i) {
