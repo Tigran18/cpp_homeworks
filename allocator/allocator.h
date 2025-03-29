@@ -5,12 +5,7 @@
 
 template <typename T>
 struct SimpleAllocator {
-    using value_type = T;
-
     SimpleAllocator()=delete;
-
-    template <typename U>
-    SimpleAllocator(const SimpleAllocator<U>&) noexcept {}
 
     [[nodiscard]] static T* allocate(std::size_t n) {
         if (n == 0) {
