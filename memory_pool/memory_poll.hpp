@@ -32,7 +32,7 @@ public:
         }
     }
 
-    static void* allocate() {
+    [[nodiscard]] static void* allocate() {
         if (freeBlocks.empty()) {
             throw std::bad_alloc();
         }
