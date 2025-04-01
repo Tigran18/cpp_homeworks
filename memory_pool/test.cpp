@@ -4,9 +4,11 @@
 int main() {
     MemoryPool::initialize(32, 10);
 
-    void* ptr1 = MemoryPool::allocate();
-    void* ptr2 = MemoryPool::allocate();
-    std::cout << "Allocated: " << ptr1 << " and " << ptr2 << std::endl;
+    char* ptr1 = reinterpret_cast<char*>(MemoryPool::allocate());
+    char* ptr2 = reinterpret_cast<char*>(MemoryPool::allocate());
+    *ptr1='6';
+    *ptr2=120;
+    std::cout << "Allocated: " << *ptr1<<" at address "<<static_cast<void*>(ptr1) << " and " << *ptr2<<" at address "<<reinterpret_cast<int*>(ptr2) << std::endl;
 
     MemoryPool::deallocate(ptr1);
     MemoryPool::deallocate(ptr2);

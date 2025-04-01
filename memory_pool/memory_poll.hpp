@@ -2,17 +2,14 @@
 #include "allocator.hpp"
 #include <vector>
 #include <cstdlib>
+#include <algorithm> // Needed for std::find
 
 class MemoryPool {
 private:
     MemoryPool() = delete;
-
     MemoryPool(const MemoryPool&) = delete;
-
     MemoryPool& operator=(const MemoryPool&) = delete;
-    
     MemoryPool(MemoryPool&&) = delete;
-    
     MemoryPool& operator=(MemoryPool&&) = delete;
 
     static char* pool;
@@ -21,15 +18,15 @@ private:
     static std::vector<char*> freeBlocks;
 
 public:
-    static void initialize(std::size_t blockSize, std::size_t blockCount) {
-        if (!pool) {
-            pool = SimpleAllocator<char>::allocate(blockSize * blockCount);
-            for (std::size_t i = 0; i < blockCount; ++i) {
-                freeBlocks.push_back(pool + i * blockSize);
-            }
-            MemoryPool::blockSize = blockSize;
-            MemoryPool::blockCount = blockCount;
+    static void initialize(std::size_t newBlockSize, std::size_t newBlockCount) {
+        if (pool) cleanup(); // Prevent memory leak by cleaning up previous pool
+        pool = SimpleAllocator<char>::allocate(newBlockSize * newBlockCount);
+        freeBlocks.clear();
+        for (std::size_t i = 0; i < newBlockCount; ++i) {
+            freeBlocks.push_back(pool + i * newBlockSize);
         }
+        blockSize = newBlockSize;
+        blockCount = newBlockCount;
     }
 
     [[nodiscard]] static void* allocate() {
@@ -42,17 +39,23 @@ public:
     }
 
     static void deallocate(void* block) {
-        freeBlocks.push_back(static_cast<char*>(block));
+        char* charBlock = reinterpret_cast<char*>(block);
+        if (std::find(freeBlocks.begin(), freeBlocks.end(), charBlock) != freeBlocks.end()) {
+            throw std::runtime_error("Double free detected");
+        }
+        freeBlocks.push_back(charBlock);
     }
 
     static void cleanup() {
         if (pool) {
             SimpleAllocator<char>::deallocate(pool, blockSize * blockCount);
             pool = nullptr;
+            freeBlocks.clear();
         }
     }
 };
 
+// Static members initialization
 char* MemoryPool::pool = nullptr;
 std::size_t MemoryPool::blockSize = 0;
 std::size_t MemoryPool::blockCount = 0;
