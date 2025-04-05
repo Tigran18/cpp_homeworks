@@ -2,7 +2,7 @@
 #include "allocator.hpp"
 #include <vector>
 #include <cstdlib>
-#include <algorithm> // Needed for std::find
+#include <algorithm>
 
 class MemoryPool {
 private:
@@ -19,7 +19,7 @@ private:
 
 public:
     static void initialize(std::size_t newBlockSize, std::size_t newBlockCount) {
-        if (pool) cleanup(); // Prevent memory leak by cleaning up previous pool
+        if (pool) cleanup(); 
         pool = SimpleAllocator<char>::allocate(newBlockSize * newBlockCount);
         freeBlocks.clear();
         for (std::size_t i = 0; i < newBlockCount; ++i) {
@@ -55,7 +55,6 @@ public:
     }
 };
 
-// Static members initialization
 char* MemoryPool::pool = nullptr;
 std::size_t MemoryPool::blockSize = 0;
 std::size_t MemoryPool::blockCount = 0;

@@ -18,54 +18,6 @@ namespace my{
             node* root=nullptr;
             std::size_t size=0;
         public:
-           
-        class iterator {
-            private:
-                std::vector<node*> stack;
-                void pushLeft(node* n) {
-                    while (n) {
-                        stack.push_back(n);
-                        n = n->leftnode;
-                    }
-                }
-    
-            public:
-                iterator(node* root) {
-                    pushLeft(root);
-                }
-    
-                iterator& operator++() {
-                    if (stack.empty()) return *this;
-    
-                    node* n = stack.back();
-                    stack.pop_back();
-                    if (n->rightnode) {
-                        pushLeft(n->rightnode);
-                    }
-    
-                    return *this;
-                }
-    
-                const T& operator*() const {
-                    return stack.back()->data;
-                }
-    
-                const T* operator->() const {
-                    return &(stack.back()->data);
-                }
-    
-                bool operator==(const iterator& other) const {
-                    if (stack.empty() && other.stack.empty()) return true;
-                    if (stack.empty() || other.stack.empty()) return false;
-                    return stack.back() == other.stack.back();
-                }
-    
-                bool operator!=(const iterator& other) const {
-                    return !(*this == other);
-                }
-            };
-    
-
             set();
 
             template <typename ...Args>
@@ -80,14 +32,28 @@ namespace my{
             set& operator=(const set& other);
 
             set& operator=(set&& other)noexcept;
+        class iterator {
+            private:
+                std::vector<node*> stack;
+                void pushLeft(node* n);
+    
+            public:
+                iterator(node* root);
+    
+                iterator& operator++();
+    
+                const T& operator*() const;
+    
+                const T* operator->() const;
+    
+                bool operator==(const iterator& other) const;
+    
+                bool operator!=(const iterator& other) const;
+            };
             
-            iterator begin() const {
-                return iterator(root);
-            }
+            iterator begin() const;
 
-            iterator end() const {
-                return iterator(nullptr);
-            }
+            iterator end() const;
     };
 }
 
