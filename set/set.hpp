@@ -13,10 +13,12 @@ namespace my{
                 node* rightnode=nullptr;
                 node* leftnode=nullptr;
 
-                node(T& value):data(std::move(value)){}
+                node(const T& value);
             };
             node* root=nullptr;
             std::size_t size=0;
+            node* delete_node(node* n , const T& value);
+            node* find_min(node* n);
         public:
             set();
 
@@ -32,6 +34,13 @@ namespace my{
             set& operator=(const set& other);
 
             set& operator=(set&& other)noexcept;
+
+            void remove(const T& value);
+
+            ~set();
+
+            void delete_tree(node* n);
+
         class iterator {
             private:
                 std::vector<node*> stack;

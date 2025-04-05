@@ -3,6 +3,9 @@
 using namespace my;
 
 template <typename T>
+set<T>::node::node(const T& value):data(std::move(value)){}
+
+template <typename T>
 set<T>::set():root(nullptr), size(0){}
 
 template <typename T>
@@ -13,16 +16,26 @@ set<T>::set(T value, Args ...args):set(){
 }
 
 template <typename T>
-set<T>::set(const set& other)=default;
+set<T>::set(const set& other):root(nullptr), size(0){
+    for(auto it=other.begin(); it!=other.end(); ++it){
+        insert(*it);
+    }
+}
 
 template <typename T>
-set<T>::set(set&& other)noexcept{
+set<T>::set(set&& other)noexcept:root(other.root), size(other.size){
+    other.root=nullptr;
+    other.size=0;
 }
 
 template <typename T>
 set<T>& set<T>::operator=(const set& other){
     if(this!=&other){
-        
+        delete_tree(root);
+        root=nullptr;
+        for(auto it=other.begin(); it!=other.end(); ++it){
+            insert(*it);
+        }
     }
     return *this;
 }
@@ -30,19 +43,38 @@ set<T>& set<T>::operator=(const set& other){
 template <typename T>
 set<T>& set<T>::operator=(set&& other)noexcept{
     if(this!=&other){
+        delete_tree(root);
+        root=other.root;
+        size=other.size;
+        other.root=nullptr;
+        other.size=0;
     }
     return *this;
 }
 
+template <typename T>
+set<T>::~set(){
+    delete_tree(root);
+}
+
+template <typename T>
+void set<T>::delete_tree(node* n){
+    if(!n){
+        return;
+    }
+    delete_tree(n->leftnode);
+    delete_tree(n->rightnode);
+    --size;
+    delete n;
+}
 
 template <typename T>
 typename set<T>::node* set<T>::insert(const T& value) {
     if (!root) {
-        root = new node(const_cast<T&>(value));
+        root = new node(value);
         ++size;
         return root;
     }
-
     node* current = root;
     while (true) {
         if (value == current->data) {
@@ -121,4 +153,55 @@ typename set<T>::iterator set<T>::begin() const {
 template <typename T>
 typename set<T>::iterator set<T>::end() const {
     return iterator(nullptr);
+}
+
+template <typename T>
+void set<T>::remove(const T& value) {
+    root = delete_node(root, value);
+}
+
+template <typename T>
+typename set<T>::node* set<T>::delete_node(node* n, const T& value) {
+    if (!n) {
+        return n;
+    }
+    if (value < n->data) {
+        n->leftnode = delete_node(n->leftnode, value);
+    }
+    else if (value > n->data) {
+        n->rightnode = delete_node(n->rightnode, value);
+    }
+    else {
+        if (!n->leftnode && !n->rightnode) {
+            delete n;
+            return nullptr;
+        }
+        
+        else if (!n->leftnode) {
+            node* temp = n->rightnode;  
+            delete n;  
+            return temp;
+        }
+        else if (!n->rightnode) {
+            node* temp = n->leftnode; 
+            delete n;  
+            return temp;  
+        }
+        else {
+            node* successor = find_min(n->rightnode);
+
+            n->data = successor->data;
+
+            n->rightnode = delete_node(n->rightnode, successor->data);
+        }
+    }
+    return n;
+}
+
+template <typename T>
+typename set<T>::node* set<T>::find_min(node* n) {
+    while (n && n->leftnode) {
+        n = n->leftnode;
+    }
+    return n;
 }
