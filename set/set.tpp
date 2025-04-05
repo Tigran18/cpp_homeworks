@@ -3,26 +3,13 @@
 using namespace my;
 
 template <typename T>
-set<T>::set()=default;
-
-template <typename T>
-bool check(const set<T>& obj, T el){
-    for(const auto& item : obj.m_set){
-        if(item == el){
-            return false;
-        }
-    }
-    return true;
-}
+set<T>::set():data(0), rightnode(nullptr), leftnode(nullptr);
 
 template <typename T>
 set<T>::set(std::initializer_list<T> init){
     for(auto& el : init){
-        if(check(*this, el)){
-            m_set.push_back(el);
-        }
+        
     }
-    std::sort(m_set.begin(), m_set.end());
 }
 
 template <typename T>

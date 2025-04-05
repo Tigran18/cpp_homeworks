@@ -8,7 +8,9 @@ namespace my{
     template <typename T>
     class set{
         private:
-            std::vector<T> m_set;
+            T data;
+            set* rightnode;
+            set* leftnode;
         public:
             set();
 
@@ -39,8 +41,6 @@ namespace my{
             void insert(const T& data);
 
             void erase(const T& data);
-
-            friend bool check<>(const set<T>& obj, T el);      
     };
 }
 
