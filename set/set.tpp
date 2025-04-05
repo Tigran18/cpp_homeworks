@@ -3,27 +3,57 @@
 using namespace my;
 
 template <typename T>
-set<T>::set():data(0), rightnode(nullptr), leftnode(nullptr);
+set<T>::set():root(nullptr), size(0){}
 
 template <typename T>
-set<T>::set(std::initializer_list<T> init){
-    for(auto& el : init){
-        
+template <typename ...Args>
+set<T>::set(T value, Args ...args):set(){
+    insert(value);
+    (insert(args), ...);
+}
+
+template <typename T>
+typename set<T>::node* set<T>::insert(const T& value) {
+    if (!root) {
+        root = new node(const_cast<T&>(value));
+        ++size;
+        return root;
+    }
+
+    node* current = root;
+    while (true) {
+        if (value == current->data) {
+            return current;
+        } else if (value < current->data) {
+            if (!current->leftnode) {
+                current->leftnode = new node(const_cast<T&>(value));
+                ++size;
+                return current->leftnode;
+            }
+            current = current->leftnode;
+        } else {
+            if (!current->rightnode) {
+                current->rightnode = new node(const_cast<T&>(value));
+                ++size;
+                return current->rightnode;
+            }
+            current = current->rightnode;
+        }
     }
 }
+
 
 template <typename T>
 set<T>::set(const set& other)=default;
 
 template <typename T>
 set<T>::set(set&& other)noexcept{
-    m_set=std::move(other.m_set);
 }
 
 template <typename T>
 set<T>& set<T>::operator=(const set& other){
     if(this!=&other){
-        m_set=other.m_set;
+        
     }
     return *this;
 }
@@ -31,64 +61,6 @@ set<T>& set<T>::operator=(const set& other){
 template <typename T>
 set<T>& set<T>::operator=(set&& other)noexcept{
     if(this!=&other){
-        m_set=std::move(other.m_set);
     }
     return *this;
-}
-
-template <typename T>
-auto set<T>::begin(){
-    return m_set.begin();
-}
-
-template <typename T>
-auto set<T>::begin()const{
-    return m_set.begin();
-}
-
-template <typename T>
-auto set<T>::end(){
-    return m_set.end();
-}
-
-template <typename T>
-auto set<T>::end()const{
-    return m_set.end();
-}
-
-template <typename T>
-bool set<T>::empty() const{
-    return m_set.empty();
-}
-
-template <typename T>
-auto set<T>::find(const T& data)const{
-    for(auto it=m_set.begin(); it!=m_set.end(); ++it){
-        if(data==*it){
-            return it;
-        }
-    }
-    return m_set.end();
-}
-
-template <typename T>
-std::size_t set<T>::size()const{
-    return m_set.size();
-}
-
-template <typename T>
-void set<T>::insert(const T& data){
-    m_set.push_back(data);
-    std::sort(m_set.begin(), m_set.end());
-}
-
-template <typename T>
-void set<T>::erase(const T& data){
-    std::size_t i=0;
-    for(auto it=m_set.begin(); it!=m_set.end(); ++it){
-        if(*it==data){
-            m_set.erase(m_set.begin()+i);
-        }
-        i++;
-    }
 }
