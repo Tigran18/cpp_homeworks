@@ -2,6 +2,8 @@
 #include <initializer_list>
 #include <algorithm>
 #include <cstddef>
+#include <shared_mutex>
+#include <mutex>
 
 namespace my {
     template <typename T>
@@ -10,7 +12,7 @@ namespace my {
         T* m_ptr = nullptr;
         std::size_t m_size = 0;
         std::size_t m_cap = 0;
-
+        mutable std::shared_mutex mutex;
         void reallocate(std::size_t new_cap);
 
     public:
@@ -31,6 +33,8 @@ namespace my {
         void clear();
 
         void push_back(const T& arg);
+
+        void push_back(T&& arg);
 
         T& operator[](const std::size_t& k);
 
