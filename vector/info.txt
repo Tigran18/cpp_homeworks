@@ -1,0 +1,14 @@
+Methods that vector class provides:
+
+default constuctor
+constuctor with initalizer list
+copy constructor
+move constructor
+copy assignment constructor
+move assignment constructor
+destructor
+clear() method
+operator[] for getting an elemnt of a class
+operator[] for changing an element of a class
+size() return the size of the vector
+capacity() return the capacity of the vector
