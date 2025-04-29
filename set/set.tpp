@@ -84,7 +84,7 @@ typename set<T>::node* set<T>::insert(const T& value) {
                 current->leftnode = new node(const_cast<T&>(value));
                 ++size;
                 return current->leftnode;
-            }
+            }  
             current = current->leftnode;
         } else {
             if (!current->rightnode) {
