@@ -12,7 +12,7 @@ int main(){
     cin>>n;
     vector<int> vec;
     for(int i=0; i<n; i++){
-        vec.push_back(rand()%101-50);
+        vec.push_back(rand()%(n*2+1)-n);
     }
     auto merge_sort=[&](auto& merge_sort, vector<int>& vec, int left, int right, auto comparator)->void{
         if(left<right){
@@ -43,5 +43,6 @@ int main(){
     for(auto& el : vec){
         cout<<el<<"  ";
     }
+    std::cout<<"\n";
     return 0;
 }
