@@ -6,8 +6,12 @@
 #include <cctype>
 #include <stdexcept>
 #include <variant>
+#include <vector>
 
-using JSONvalue = std::variant<std::string, int, bool>;
+class JSON;
+
+using JSONvalues_for_vector = std::variant<std::string, int, bool, JSON>;
+using JSONvalue = std::variant<std::string, int, bool, JSON, std::vector<JSONvalues_for_vector>>;
 
 class JSON {
 private:
@@ -24,13 +28,11 @@ private:
     std::string parse_string() {
         skip_whitespace();
         if (content[index] != '"') throw std::runtime_error("Expected '\"'");
-        index++;    
-
+        index++;
         std::string result;
         while (index < content.size() && content[index] != '"') {
             result += content[index++];
         }
-
         if (index >= content.size() || content[index] != '"') {
             throw std::runtime_error("Unterminated string");
         }
@@ -38,13 +40,61 @@ private:
         return result;
     }
 
+    JSON parse_object() {
+        if (content[index] != '{') throw std::runtime_error("Expected '{'");
+        size_t start_index = index;
+        JSON nested(content, start_index);
+        nested.parse();
+        index = nested.index;
+        return nested;
+    }
+
+    std::vector<JSONvalues_for_vector> parse_array() {
+        std::vector<JSONvalues_for_vector> arr;
+        index++;
+        skip_whitespace();
+        while (index < content.size() && content[index] != ']') {
+            skip_whitespace();
+            if (content[index] == '{') {
+                arr.push_back(parse_object());
+            } else if (content[index] == '"') {
+                arr.push_back(parse_string());
+            } else if (std::isdigit(content[index]) || content[index] == '-') {
+                std::string num;
+                if (content[index] == '-') num += content[index++];
+                while (index < content.size() && std::isdigit(content[index])) {
+                    num += content[index++];
+                }
+                arr.push_back(std::stoi(num));
+            } else if (content.compare(index, 4, "true") == 0) {
+                index += 4;
+                arr.push_back(true);
+            } else if (content.compare(index, 5, "false") == 0) {
+                index += 5;
+                arr.push_back(false);
+            } else {
+                throw std::runtime_error("Invalid value in array");
+            }
+            skip_whitespace();
+            if (content[index] == ',') {
+                index++;
+            } else if (content[index] != ']') {
+                throw std::runtime_error("Expected ',' or ']'");
+            }
+            skip_whitespace();
+        }
+        if (content[index] != ']') {
+            throw std::runtime_error("Expected ']'");
+        }
+        index++;
+        return arr;
+    }
+
     JSONvalue parse_value() {
         skip_whitespace();
-
-        if (content[index] == '"') {
-            return parse_string();
-        }
-
+        if (content[index] == '{') return parse_object();
+        if (content[index] == '[') return parse_array();
+        if (content[index] == '"') return parse_string();
         if (content.compare(index, 4, "true") == 0) {
             index += 4;
             return true;
@@ -53,12 +103,10 @@ private:
             index += 5;
             return false;
         }
-
         if (content.compare(index, 4, "null") == 0) {
             index += 4;
-            return std::string("null"); 
+            return std::string("null");
         }
-
         std::string result;
         if (content[index] == '-') {
             result += content[index++];
@@ -66,11 +114,9 @@ private:
         while (index < content.size() && std::isdigit(content[index])) {
             result += content[index++];
         }
-
         if (result.empty()) {
             throw std::runtime_error("Invalid value");
         }
-
         return std::stoi(result);
     }
 
@@ -78,27 +124,21 @@ private:
         skip_whitespace();
         if (content[index] != '{') throw std::runtime_error("Expected '{'");
         index++;
-
         while (true) {
             skip_whitespace();
             if (content[index] == '}') {
                 index++;
                 break;
             }
-
             std::string key = parse_string();
             skip_whitespace();
-
             if (content[index] != ':') throw std::runtime_error("Expected ':'");
-            index++; 
-
+            index++;
             JSONvalue value = parse_value();
             elements[key] = value;
-
             skip_whitespace();
             if (content[index] == ',') {
                 index++;
-                continue;
             } else if (content[index] == '}') {
                 index++;
                 break;
@@ -108,6 +148,38 @@ private:
         }
     }
 
+    void print_value(const JSONvalue& val, int tab = 2) const {
+        if (std::holds_alternative<std::string>(val)) {
+            std::cout << "[string] " << std::get<std::string>(val);
+        } else if (std::holds_alternative<int>(val)) {
+            std::cout << "[int] " << std::get<int>(val);
+        } else if (std::holds_alternative<bool>(val)) {
+            std::cout << "[bool] " << (std::get<bool>(val) ? "true" : "false");
+        } else if (std::holds_alternative<JSON>(val)) {
+            std::cout << "[object] {\n";
+            std::get<JSON>(val).print(tab + 2);
+            std::cout << std::string(tab, ' ') << "}";
+        } else if (std::holds_alternative<std::vector<JSONvalues_for_vector>>(val)) {
+            std::cout << "[array] [ ";
+            for (const auto& elem : std::get<std::vector<JSONvalues_for_vector>>(val)) {
+                std::visit([&](auto&& arg) {
+                    using T = std::decay_t<decltype(arg)>;
+                    if constexpr (std::is_same_v<T, std::string>) std::cout << "\"" << arg << "\" ";
+                    else if constexpr (std::is_same_v<T, int>) std::cout << arg << " ";
+                    else if constexpr (std::is_same_v<T, bool>) std::cout << (arg ? "true" : "false") << " ";
+                    else if constexpr (std::is_same_v<T, JSON>) {
+                        std::cout << "{ ";
+                        arg.print(tab + 2);
+                        std::cout << " } ";
+                    }
+                }, elem);
+            }
+            std::cout << "]";
+        }
+    }
+
+    JSON(const std::string& input, size_t startIndex) : content(input), index(startIndex) {}
+
 public:
     JSON(const std::string& filename) {
         std::ifstream file(filename);
@@ -115,12 +187,10 @@ public:
             std::cerr << "Couldn't open the file\n";
             return;
         }
-
         char ch;
         while (file.get(ch)) {
             content += ch;
         }
-
         try {
             parse();
         } catch (const std::exception& e) {
@@ -128,25 +198,25 @@ public:
         }
     }
 
-    void print() const {
+    JSON(const std::string& raw_content, bool isRawString) : content(raw_content), index(0) {
+        if (isRawString) {
+            try {
+                parse();
+            } catch (const std::exception& e) {
+                std::cerr << "JSON parsing error: " << e.what() << "\n";
+            }
+        }
+    }
+    
+    void print(int tab = 2) const {
         for (const auto& [key, val] : elements) {
-            std::cout << key << " -> ";
-
-            if (std::holds_alternative<std::string>(val)) {
-                std::cout << "[string] " << std::get<std::string>(val);
-            }
-            else if (std::holds_alternative<int>(val)) {
-                std::cout << "[int] " << std::get<int>(val);
-            }
-            else if (std::holds_alternative<bool>(val)) {
-                std::cout << "[bool] " << std::get<bool>(val);
-            }
-
-            std::cout << '\n';
+            std::cout << std::string(tab, ' ') << "\"" << key << "\": ";
+            print_value(val, tab);
+            std::cout << "\n";
         }
     }
 
-    const std::map<std::string, JSONvalue>& get_elements() const {
-        return elements;
+    void add(const std::string& key, const JSONvalue& val){
+        elements[key]=val;
     }
 };
