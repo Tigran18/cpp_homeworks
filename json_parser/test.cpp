@@ -10,7 +10,6 @@ int main() {
         true,
         JSON("{\"nestedKey\":\"nestedValue\"}", true)
     });
-    obj.print();
-
+    obj.print(2);
     return 0;
 }

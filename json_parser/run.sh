@@ -1,1 +1,1 @@
-g++ test.cpp && ./a.out
+g++ test.cpp json_parser.cpp && ./a.out
