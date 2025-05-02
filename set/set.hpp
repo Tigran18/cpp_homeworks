@@ -1,68 +1,61 @@
 #pragma once
-#include <memory>
 #include <vector>
-#include <utility>
-#include <algorithm>
+#include <cstddef>
 
-namespace my{
+namespace my {
     template <typename T>
-    class set{
-        private:
-            struct node{
-                T data;
-                node* rightnode=nullptr;
-                node* leftnode=nullptr;
+    class set {
+    private:
+        static constexpr bool RED = true;
+        static constexpr bool BLACK = false;
 
-                node(const T& value);
-            };
-            node* root=nullptr;
-            std::size_t size=0;
-            node* delete_node(node* n , const T& value);
-            node* find_min(node* n);
-        public:
-            set();
+        struct node {
+            T data;
+            node* left = nullptr;
+            node* right = nullptr;
+            bool color;
+            node(const T& value, bool c = RED) : data(value), color(c) {}
+        };
 
-            template <typename ...Args>
-            set(T data, Args ...args);
+        node* root = nullptr;
+        std::size_t size = 0;
 
-            node* insert(const T& value);
+        bool is_red(node* n) const;
+        node* rotate_left(node* h);
+        node* rotate_right(node* h);
+        void flip_colors(node* h);
+        node* insert(node* h, const T& value);
+        node* delete_node(node* h, const T& value);
+        node* find_min(node* h);
+        void delete_tree(node* h);
 
-            set(const set& other);
+    public:
+        set();
+        template <typename... Args>
+        set(T first, Args... rest);
+        set(const set& other);
+        set(set&& other) noexcept;
+        set& operator=(const set& other);
+        set& operator=(set&& other) noexcept;
+        ~set();
 
-            set(set&& other)noexcept;
-
-            set& operator=(const set& other);
-
-            set& operator=(set&& other)noexcept;
-
-            void remove(const T& value);
-
-            ~set();
-
-            void delete_tree(node* n);
+        void insert(const T& value);
+        void remove(const T& value);
 
         class iterator {
-            private:
-                std::vector<node*> stack;
-                void pushLeft(node* n);
-    
-            public:
-                iterator(node* root);
-    
-                iterator& operator++();
-    
-                const T& operator*() const;
-    
-                const T* operator->() const;
-    
-                bool operator==(const iterator& other) const;
-    
-                bool operator!=(const iterator& other) const;
-            };
-            
-            iterator begin() const;
+        private:
+            std::vector<node*> stack;
+            void pushLeft(node* n);
+        public:
+            iterator(node* root);
+            iterator& operator++();
+            const T& operator*() const;
+            bool operator!=(const iterator& other) const;
+            bool operator==(const iterator& other) const;
+        };
 
-            iterator end() const;
+        iterator begin() const;
+        iterator end() const;
     };
 }
 
