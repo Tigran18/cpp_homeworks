@@ -11,5 +11,11 @@ int main() {
         JSON("{\"nestedKey\":\"nestedValue\"}", true)
     });
     obj.print(2);
+    try{
+        std::cout<<obj["key"]<<std::endl;
+    }
+    catch(const std::exception& ex){
+        std::cout<<ex.what()<<std::endl;
+    }
     return 0;
 }
