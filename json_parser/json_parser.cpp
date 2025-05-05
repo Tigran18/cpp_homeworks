@@ -129,33 +129,35 @@ void JSON::parse() {
     }
 }
 
-void JSON::print_value(const JSONvalue& val, int tab = 2) const {
+void JSON::print_value(const JSONvalue& val, int tab) const {
     if (std::holds_alternative<std::string>(val)) {
-        std::cout << "[string] " << std::get<std::string>(val);
+        std::cout << "\"" << std::get<std::string>(val) << "\"";
     } else if (std::holds_alternative<int>(val)) {
-        std::cout << "[int] " << std::get<int>(val);
+        std::cout << std::get<int>(val);
     } else if (std::holds_alternative<bool>(val)) {
-        std::cout << "[bool] " << (std::get<bool>(val) ? "true" : "false");
+        std::cout << (std::get<bool>(val) ? "true" : "false");
     } else if (std::holds_alternative<JSON>(val)) {
-        std::cout << "[object] {\n";
+        std::cout << "{\n";
         std::get<JSON>(val).print(tab + 2);
         std::cout << std::string(tab, ' ') << "}";
     } else if (std::holds_alternative<std::vector<JSONvalues_for_vector>>(val)) {
-        std::cout << "[array] [ ";
-        for (const auto& elem : std::get<std::vector<JSONvalues_for_vector>>(val)) {
+        std::cout << "[\n";
+        const auto& vec = std::get<std::vector<JSONvalues_for_vector>>(val);
+        for (size_t i = 0; i < vec.size(); ++i) {
+            std::cout << std::string(tab + 2, ' ');
             std::visit([&](auto&& arg) {
-                using T = std::decay_t<decltype(arg)>;
-                if constexpr (std::is_same_v<T, std::string>) std::cout << "\"" << arg << "\" ";
-                else if constexpr (std::is_same_v<T, int>) std::cout << arg << " ";
-                else if constexpr (std::is_same_v<T, bool>) std::cout << (arg ? "true" : "false") << " ";
-                else if constexpr (std::is_same_v<T, JSON>) {
-                    std::cout << "{ ";
-                    arg.print(tab + 2);
-                    std::cout << " } ";
+                if constexpr (std::is_same_v<std::decay_t<decltype(arg)>, std::string>) {
+                    std::cout << "\"" << arg << "\"";
+                } else if constexpr (std::is_same_v<std::decay_t<decltype(arg)>, bool>) {
+                    std::cout << (arg ? "true" : "false");
+                } else {
+                    std::cout << arg;
                 }
-            }, elem);
+            }, vec[i]);
+            if (i + 1 < vec.size()) std::cout << ",";
+            std::cout << "\n";
         }
-        std::cout << "]";
+        std::cout << std::string(tab, ' ') << "]";
     }
 }
 
@@ -187,11 +189,19 @@ JSON::JSON(const std::string& raw_content, bool isRawString) : content(raw_conte
 }
 
 void JSON::print(int tab = 2) const {
-    for (const auto& [key, val] : elements) {
+    std::cout << "{\n";
+    auto it = elements.begin();
+    while (it != elements.end()) {
+        const auto& [key, val] = *it;
         std::cout << std::string(tab, ' ') << "\"" << key << "\": ";
         print_value(val, tab);
+        ++it;
+        if (it != elements.end()) {
+            std::cout << ",";
+        }
         std::cout << "\n";
     }
+    std::cout << "}\n";
 }
 
 void JSON::add(const std::string& key, const JSONvalue& val){
@@ -204,10 +214,36 @@ const JSONvalue& JSON::operator[](const std::string& key) const {
 
 std::ostream& operator<<(std::ostream& os, const JSONvalue& val) {
     std::visit([&os](auto&& arg) {
-        os << arg;
+        using T = std::decay_t<decltype(arg)>;
+        if constexpr (std::is_same_v<T, std::string>) {
+            os << "\"" << arg << "\"";
+        } else if constexpr (std::is_same_v<T, bool>) {
+            os << (arg ? "true" : "false");
+        } else if constexpr (std::is_same_v<T, JSON>) {
+            os << arg;
+        } else if constexpr (std::is_same_v<T, std::vector<JSONvalues_for_vector>>) {
+            os << "[";
+            for (size_t i = 0; i < arg.size(); ++i) {
+                std::visit([&os](auto&& innerVal) {
+                    using InnerT = std::decay_t<decltype(innerVal)>;
+                    if constexpr (std::is_same_v<InnerT, std::string>) {
+                        os << "\"" << innerVal << "\"";
+                    } else if constexpr (std::is_same_v<InnerT, bool>) {
+                        os << (innerVal ? "true" : "false");
+                    } else {
+                        os << innerVal;
+                    }
+                }, arg[i]);
+                if (i + 1 < arg.size()) os << ", ";
+            }
+            os << "]";
+        } else {
+            os << arg;
+        }
     }, val);
     return os;
 }
+
 
 std::ostream& operator<<(std::ostream& os, const JSON& json) {
     os << "{ ";
