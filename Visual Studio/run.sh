@@ -1,0 +1,1 @@
+g++ merge_sort.cpp && time ./a.out
