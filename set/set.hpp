@@ -14,7 +14,7 @@ namespace my {
             node* left = nullptr;
             node* right = nullptr;
             bool color;
-            node(const T& value, bool c = RED) : data(value), color(c) {}
+            node(const T& value, bool c = RED);
         };
 
         node* root = nullptr;
@@ -41,6 +41,7 @@ namespace my {
 
         void insert(const T& value);
         void remove(const T& value);
+        bool contains(const T& value)const;
 
         class iterator {
         private:
@@ -56,6 +57,7 @@ namespace my {
 
         iterator begin() const;
         iterator end() const;
+        iterator find(const T& value)const;
     };
 }
 
