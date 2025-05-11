@@ -6,15 +6,15 @@ namespace my {
     template <typename T>
     class set {
     private:
-        static constexpr bool RED = true;
-        static constexpr bool BLACK = false;
+        static constexpr bool red = true;
+        static constexpr bool black = false;
 
         struct node {
             T data;
-            node* left = nullptr;
-            node* right = nullptr;
+            node* leftnode = nullptr;
+            node* rightnode = nullptr;
             bool color;
-            node(const T& value, bool c = RED);
+            node(const T& value, bool c = red);
         };
 
         node* root = nullptr;
@@ -53,6 +53,7 @@ namespace my {
             const T& operator*() const;
             bool operator!=(const iterator& other) const;
             bool operator==(const iterator& other) const;
+            const T* operator->() const;
         };
 
         iterator begin() const;

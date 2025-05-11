@@ -26,13 +26,37 @@ std::string grep::extract_word() {
     return result;
 }
 
+void grep::parse_flags(){
+    while(command_index<command.size() && command[command_index]=='-'){
+        ++command_index;
+        while(command_index<command.size() && std::isalpha(command[command_index])){
+            char f=command[command_index++];
+            switch(f){
+                case 'i': ignore_case = true; 
+                break;
+                case 'n': show_line_numbers = true; 
+                break;
+                case 'v': invert_match = true; 
+                break;
+                case 'c': count_only = true; 
+                break;
+                case 'l': list_filenames_only = true; 
+                break;
+                case 'h': suppress_filename = true; 
+                break;
+                default:
+                    std::cerr << "Unknown flag: -" << f << "\n";
+                    break;
+            }
+        }
+    }    
+    skip_whitespace();
+}
+
 grep::grep(const std::string& cmd) : command(cmd) {
     command_index = 4;
     skip_whitespace();
-    if (command[command_index] == '-') {
-        flag = extract_word();
-        skip_whitespace();
-    }
+    parse_flags();
     pattern = extract_word();
     skip_whitespace();
     while (command_index < command.size()) {
@@ -45,14 +69,11 @@ grep::grep(const std::string& cmd) : command(cmd) {
 }
 
 void grep::run() {
-    std::cout << "Flag: " << flag << "\n";
-    std::cout << "Pattern: " << pattern << "\n";
     for(auto& filename : filenames){
-        std::cout << "Filename: " << filename << "\n";
         std::fstream file(filename);
         if (!file.is_open()) {
             std::cerr << "Couldn't open the file\n";
-            return;
+            continue;
         }
         char ch;
         std::string content;
@@ -69,7 +90,7 @@ void grep::run() {
                 line += content[content_index++];
             }
             bool matched = false;
-            std::string line_output;
+            std::string line_output="\033[35m"+filename+"\033[36m"+":\033[0m";
             size_t line_index = 0;
             std::string output;
             while (line_index < line.size()) {

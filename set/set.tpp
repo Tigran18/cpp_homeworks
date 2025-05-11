@@ -4,7 +4,7 @@ using namespace my;
 
 template <typename T>
 set<T>::node::node(const T& value, bool color):data(std::move(value)), color(color){
-    color=RED;
+    color=red;
 }
 
 template <typename T>
@@ -14,58 +14,58 @@ bool set<T>::is_red(node* n)const{
 
 template <typename T>
 typename set<T>::node* set<T>::rotate_left(node* root){
-    node* x=root->right;
-    root->right=x->left;
-    x->left=root;
+    node* x=root->rightnode;
+    root->rightnode=x->leftnode;
+    x->leftnode=root;
     x->color=root->color;
-    root->color=RED;
+    root->color=red;
     return x;
 }
 
 template <typename T>
 typename set<T>::node* set<T>::rotate_right(node* root){
-    node* x=root->left;
-    root->left=x->right;
-    x->right=root;
+    node* x=root->leftnode;
+    root->leftnode=x->rightnode;
+    x->rightnode=root;
     x->color=root->color;
-    root->color=RED;
+    root->color=red;
     return x;
 }
 
 template <typename T>
 void set<T>::flip_colors(node* root){
     root->color=!root->color;
-    if(root->left){
-        root->left->color=!root->left->color;
+    if(root->leftnode){
+        root->leftnode->color=!root->leftnode->color;
     }
-    if(root->right){
-        root->right->color=!root->right->color;
+    if(root->rightnode){
+        root->rightnode->color=!root->rightnode->color;
     }
 }
 
 template <typename T>
 typename set<T>::node* set<T>::insert(node* root, const T& value) {
     if (!root) {
-        root = new node(value, RED);
+        root = new node(value, red);
         ++size;
         return root;
     }
     if(value<root->data){
-        root->left=insert(root->left, value);
+        root->leftnode=insert(root->leftnode, value);
     }
     else if(value>root->data){
-        root->right=insert(root->right, value);
+        root->rightnode=insert(root->rightnode, value);
     }
     else{
         return root;
     }
-    if(is_red(root->right) && !is_red(root->left)){
+    if(is_red(root->rightnode) && !is_red(root->leftnode)){
         root=rotate_left(root);
     }
-    if(is_red(root->left) && is_red(root->left->left)){
+    if(is_red(root->leftnode) && is_red(root->leftnode->leftnode)){
         root=rotate_right(root);
     }
-    if(is_red(root->left) && is_red(root->right)){
+    if(is_red(root->leftnode) && is_red(root->rightnode)){
         flip_colors(root);
     }
     return root;
@@ -74,7 +74,7 @@ typename set<T>::node* set<T>::insert(node* root, const T& value) {
 template <typename T>
 void set<T>::insert(const T& value){
     root=insert(root, value);
-    root->color=BLACK;
+    root->color=black;
 }
 
 template <typename T>
@@ -134,8 +134,8 @@ void set<T>::delete_tree(node* n){
     if(!n){
         return;
     }
-    delete_tree(n->left);
-    delete_tree(n->right);
+    delete_tree(n->leftnode);
+    delete_tree(n->rightnode);
     delete n;
 }
 
@@ -148,7 +148,7 @@ template <typename T>
 void set<T>::iterator::pushLeft(node* n) {
     while (n) {
         stack.push_back(n);
-        n = n->left;
+        n = n->leftnode;
     }
 }
 
@@ -158,8 +158,8 @@ typename set<T>::iterator& set<T>::iterator::operator++() {
 
     node* n = stack.back();
     stack.pop_back();
-    if (n->right) {
-        pushLeft(n->right);
+    if (n->rightnode) {
+        pushLeft(n->rightnode);
     }
 
     return *this;
@@ -168,6 +168,11 @@ typename set<T>::iterator& set<T>::iterator::operator++() {
 template <typename T>
 const T& set<T>::iterator::operator*() const {
     return stack.back()->data;
+}
+
+template <typename T>
+const T* set<T>::iterator::operator->() const {
+    return &(stack.back()->data);
 }
 
 template <typename T>
@@ -199,33 +204,33 @@ template <typename T>
 typename set<T>::node* set<T>::delete_node(node* h, const T& value) {
     if (!h) return nullptr;
     if (value < h->data) {
-        h->left = delete_node(h->left, value);
+        h->leftnode = delete_node(h->leftnode, value);
     } else if (value > h->data) {
-        h->right = delete_node(h->right, value);
+        h->rightnode = delete_node(h->rightnode, value);
     } else {
-        if (!h->left) {
-            node* temp = h->right;
+        if (!h->leftnode) {
+            node* temp = h->rightnode;
             delete h;
             --size;
             return temp;
-        } else if (!h->right) {
-            node* temp = h->left;
+        } else if (!h->rightnode) {
+            node* temp = h->leftnode;
             delete h;
             --size;
             return temp;
         } else {
-            node* min = find_min(h->right);
+            node* min = find_min(h->rightnode);
             h->data = min->data;
-            h->right = delete_node(h->right, min->data);
+            h->rightnode = delete_node(h->rightnode, min->data);
         }
     }
-    if (is_red(h->right) && !is_red(h->left)) {
+    if (is_red(h->rightnode) && !is_red(h->leftnode)) {
         h = rotate_left(h);
     }
-    if (is_red(h->left) && is_red(h->left->left)) {
+    if (is_red(h->leftnode) && is_red(h->leftnode->leftnode)) {
         h = rotate_right(h);
     }
-    if (is_red(h->left) && is_red(h->right)) {
+    if (is_red(h->leftnode) && is_red(h->rightnode)) {
         flip_colors(h);
     }
     return h;
@@ -233,8 +238,8 @@ typename set<T>::node* set<T>::delete_node(node* h, const T& value) {
 
 template <typename T>
 typename set<T>::node* set<T>::find_min(node* n) {
-    while (n && n->left) {
-        n = n->left;
+    while (n && n->leftnode) {
+        n = n->leftnode;
     }
     return n;
 }
@@ -254,9 +259,9 @@ bool set<T>::contains(const T& value) const {
     node* current = root;
     while (current) {
         if (value < current->data)
-            current = current->left;
+            current = current->leftnode;
         else if (value > current->data)
-            current = current->right;
+            current = current->rightnode;
         else
             return true;
     }
