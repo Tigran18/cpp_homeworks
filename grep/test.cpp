@@ -18,6 +18,7 @@ int main() {
         } else {
             std::cout << "Command is grep\n";
             grep obj(command);
+            obj.run();
         }
     }
 

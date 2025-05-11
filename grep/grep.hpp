@@ -16,9 +16,6 @@ private:
     void skip_whitespace();
 
     std::string extract_word();
-
-    void run();
-
 public:
     grep(const std::string& cmd);
 
@@ -29,4 +26,6 @@ public:
     grep(grep&& other)=delete;
 
     grep& operator=(grep&& other)=delete;
+
+    void run();
 };
