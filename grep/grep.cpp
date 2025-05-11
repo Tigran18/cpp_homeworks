@@ -90,7 +90,8 @@ void grep::run() {
                 line += content[content_index++];
             }
             bool matched = false;
-            std::string line_output="\033[35m"+filename+"\033[36m"+":\033[0m";
+            std::string line_output;
+            if (filenames.size()!=1) line_output="\033[35m"+filename+"\033[36m"+":\033[0m";
             size_t line_index = 0;
             std::string output;
             while (line_index < line.size()) {
