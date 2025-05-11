@@ -4,6 +4,7 @@
 
 int main() {
     std::string command;
+    std::cout<<"grep something\n";
     while (true) {
         std::getline(std::cin, command);
         if (command.empty()) continue;

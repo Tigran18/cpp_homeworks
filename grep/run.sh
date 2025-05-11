@@ -1,1 +1,1 @@
-g++ test.cpp && ./a.out
+g++ test.cpp grep.cpp && ./a.out
