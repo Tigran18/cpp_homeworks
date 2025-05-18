@@ -10,6 +10,9 @@ int main() {
         if (command.empty()) continue;
         std::string first_word;
         size_t i = 0;
+        while(std::isspace(command[i])){
+            i++;
+        }
         while (i < command.length() && command[i] != ' ') {
             first_word += command[i++];
         }
